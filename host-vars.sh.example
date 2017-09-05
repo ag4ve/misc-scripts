@@ -1,0 +1,16 @@
+#!/bin/bash -
+
+# create a list named "foo"
+foo=()
+foo+=(perlish)
+foo+=(tester)
+
+# create another list named "bar"
+bar=()
+bar+=(nibble)
+bar+=(osx)
+
+# a list containing all elements from foo and bar
+everything=()
+everything+=(${foo[*]})
+everything+=(${bar[*]})
