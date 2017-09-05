@@ -1,14 +1,3 @@
-2016-05-17 16:25  hlein
-
-	* Makefile (1.2): Instead of using TARGET_EXEC_DIR and EXEC_FILES
-	  to sometimes mean /usr/local/bin and sometimes /usr/local/sbin
-	  (but never both at once), introduced/renamed to TARGET_BIN_DIR +
-	  BIN_FILES and TARGET_SBIN_DIR + SBIN_FILES.
-
-	  Required touching any Makefile recipe that mentioned any of those
-	  variables.  I think I got them all, and did the right thing, but
-	  I could be wrong.
-
 2015-12-12 11:26  swilson
 
 	* mon-hosts.sign (1.9): Update signature.
@@ -24,6 +13,14 @@
 2015-12-12 11:23  swilson
 
 	* mon-hosts (1.6): Upstream changes.
+
+2015-12-12 11:22  swilson
+
+	* mon-hosts.sh.sign (1.7): Update signature.
+
+2015-12-12 11:22  swilson
+
+	* mon-hosts.sh (1.46): Remove double space from help text.
 
 2015-12-12 08:17  swilson
 
@@ -49,6 +46,28 @@
 
 	* mon-hosts (1.4): Upstream changes.
 
+2015-12-12 04:03  swilson
+
+	* mon-hosts.sh.sign (1.6): Update signature.
+
+2015-12-12 04:03  swilson
+
+	* mon-hosts.sh (1.45): Allow hosts as IPs, Make an exported option
+	  to take everything from a command line, Add examples.
+
+2015-12-11 23:43  swilson
+
+	* mon-hosts.sh.sign (1.5): Update signature.
+
+2015-12-11 23:43  swilson
+
+	* mon-hosts.sh (1.44): Add a date format option.
+
+2015-12-11 23:31  swilson
+
+	* mon-hosts.sh (1.43): Make the change file work and display less
+	  wordy output. Add comments and debugging.
+
 2015-12-11 23:44  swilson
 
 	* mon-hosts (1.3): Upstream changes.
@@ -56,6 +75,21 @@
 2015-12-11 23:44  swilson
 
 	* mon-hosts.sign (1.4), mon-hosts.sign (1.5): Update signature.
+
+2015-12-11 09:18  swilson
+
+	* mon-hosts.sh (1.42): Specify null config file so that -l foo does
+	  not confuse the test.
+
+2015-12-11 09:16  swilson
+
+	* mon-hosts.sh (1.41): Include text and example file from the web
+	  site so that use is still obvious without site text.
+
+2015-12-11 09:07  swilson
+
+	* mon-hosts.sh (1.40): Allow a command with options - only test the
+	  first word is a command. Add a comment for an easy way to test.
 
 2015-11-20 15:23  swilson
 
@@ -65,14 +99,362 @@
 
 	* mon-hosts (1.2): Update with upstream changes.
 
+2015-11-20 15:15  swilson
+
+	* mon-hosts.sh.sign (1.4): Update signature.
+
+2015-11-20 15:15  swilson
+
+	* mon-hosts.sh (1.39): Add host list format and defaults to help.
+
+2015-11-20 15:03  swilson
+
+	* mon-hosts.sh (1.38): Add comments. make eval_host() so that
+	  variables can be scoped and move code out of the main for loop
+	  into that. Allow for <host>=<command> for a specific command to
+	  be run on that host/group in addition to having a global -a
+	  option for those commands. Add debug for bell.
+
+2015-11-20 11:57  swilson
+
+	* mon-hosts.sh (1.37): Add bell option.
+
 2015-11-08 00:31  swilson
 
 	* ipt-count-trace.sign (1.2), mon-hosts.sign (1.2): Update
 	  signature.
 
-2015-11-08 00:31  swilson
+2015-11-06 17:14  swilson
 
-	* Makefile (1.1), ipt-count-trace (1.1), ipt-count-trace.sign
-	  (1.1), mon-hosts (1.1), mon-hosts.sign (1.1): Add packed bash
-	  scripts, their signatures, and Makefile.
+	* mon-hosts.sh (1.36): Change env so that it has more chance of
+	  running on OSX - probably still would not because of system bash
+	  3.
+
+2015-11-06 17:12  swilson
+
+	* bashpack.pl (1.8): Allow for spaces as an interpreter can be a
+	  command such as 'env bash'.
+
+2015-11-06 17:10  swilson
+
+	* bashpack.pl (1.7): Put a space between shabang and interpreter.
+
+2015-11-02 04:47  swilson
+
+	* tmux-start.sh.sign (1.3), mon-hosts.sh.sign (1.3): Update
+	  signature.
+
+2015-11-01 15:16  swilson
+
+	* tmux-start.sh (1.16): Do not display the tmux check.
+
+2015-10-31 06:47  swilson
+
+	* mon-hosts.sh (1.35): Add date to state change line.
+
+2015-10-31 06:37  swilson
+
+	* mon-hosts.sh (1.34): Add changefile code.
+
+2015-10-30 08:24  swilson
+
+	* mon-hosts.sh (1.33): Add/correct documentation, do not
+	  increase/decrease min/max if they are already above the
+	  threshold.
+
+2015-10-29 22:19  swilson
+
+	* mon-hosts.sh (1.32): Capitalize first letter in help message. Add
+	  a debug file option. Add an option for a future feature.
+
+2015-10-29 21:16  swilson
+
+	* mon-hosts.sh (1.31): Fix documentation and retries - should only
+	  retry once by default.
+
+2015-10-29 21:02  swilson
+
+	* mon-hosts.sh (1.30): Default minwidth now that control sequences
+	  are not expected.
+
+2015-10-29 20:54  swilson
+
+	* mon-hosts.sh (1.29): Remove control characters.
+
+2015-10-29 20:51  swilson
+
+	* mon-hosts.sh (1.28): Account for surrounding brackets.
+
+2015-10-29 20:37  swilson
+
+	* mon-hosts.sh (1.27): For some reason eval does not seem to return
+	  the exit code to while to end - use for counter and if instead -
+	  cleaner code anyway. Check runs before evaluating it.
+
+2015-10-29 08:49  swilson
+
+	* mon-hosts.sh (1.26): Add an option to define the number of runs.
+
+2015-10-29 06:45  swilson
+
+	* mon-hosts.sh (1.25): Add comments and better formatting and
+	  change variable names to lower case (since that is modern bash
+	  convention) and try to make function variables local. Move
+	  rerun_cmd() parameter declaration to one place. Add debugging for
+	  new command line options. Check for the command variable since it
+	  might not be ssh.
+
+2015-10-29 05:05  swilson
+
+	* mon-hosts.sh (1.24): Add lots of math to determine padding to
+	  make sure that everything lines up when printed.
+
+2015-10-29 03:42  swilson
+
+	* mon-hosts.sh (1.23): Should be adding a space - not removing one.
+	  Fields align now. Add -X option to set a minimum status width.
+	  Make sure options that should be numbers are numbers.
+
+2015-10-28 09:58  swilson
+
+	* mon-hosts.sh.sign (1.2): Update signature.
+
+2015-10-28 06:03  swilson
+
+	* mon-hosts.sh (1.22): Try to prevent erroring commands from
+	  showing up (like if the server can not be reached).
+
+2015-10-27 22:51  swilson
+
+	* mon-hosts.sh (1.21): Easier to read.
+
+2015-10-27 22:48  swilson
+
+	* mon-hosts.sh (1.20): Syntax err.
+
+2015-10-27 22:42  swilson
+
+	* mon-hosts.sh (1.19): Account for spaces when printing.
+
+2015-10-25 20:05  swilson
+
+	* mon-hosts.sh.sign (1.1): Add mon-hosts signature.
+
+2015-10-25 20:04  swilson
+
+	* mon-hosts.sh (1.18): Modify help message to warn about the
+	  implications of the sourced config file.
+
+2015-10-25 19:59  swilson
+
+	* host-vars.sh.example.sign (1.2): Update sig.
+
+2015-10-25 19:55  swilson
+
+	* tmux-start.sh.sign (1.2): Update sig.
+
+2015-10-25 19:55  swilson
+
+	* tmux-start.sh (1.15): Balance parens and truncate line.
+
+2015-10-25 19:53  swilson
+
+	* host-vars.sh.example.sign (1.1), tmux-start.sh.sign (1.1): Add
+	  signatures.
+
+2015-10-25 19:50  swilson
+
+	* tmux-start.sh (1.14): Modify help message to warn about the
+	  implications of the sourced config file.
+
+2015-10-25 19:40  hlein
+
+	* host-vars.sh.example (1.3): Revised the example to show how to
+	  combine lists into new super-lists.
+
+2015-10-25 19:28  hlein
+
+	* host-vars.sh.example (1.2): More comments.
+
+2015-10-25 17:14  swilson
+
+	* mon-hosts.sh (1.17): Add license.
+
+2015-10-25 17:05  swilson
+
+	* tmux-start.sh (1.13): Add license.
+
+2015-10-25 17:00  swilson
+
+	* tmux-start.sh (1.12): Add LF for die. Check for tmux.
+
+2015-10-25 16:49  swilson
+
+	* tmux-start.sh (1.11): Verpage tweeks.
+
+2015-10-25 16:46  swilson
+
+	* host-vars.sh.example (1.1): Example config file.
+
+2015-10-25 16:41  hlein
+
+	* tmux-start.sh (1.10): Wording tweak in a comment.
+
+2015-10-24 21:21  swilson
+
+	* tmux-start.sh (1.9): Silent error if config is missing.
+
+2015-10-24 18:30  swilson
+
+	* mon-hosts.sh (1.16): Do not eval printf each time if we can help
+	  it - minor speedup.
+
+2015-10-24 18:14  swilson
+
+	* mon-hosts.sh (1.15): Replace printf with echo where possible
+	  because echo is almost 2x faster. Re-evaluate cols each time to
+	  allow resizing the terminal.
+
+2015-10-24 15:46  swilson
+
+	* tmux-start.sh (1.8): Check bash version - we require >4. Add
+	  comments. Use env bash instead of absolute path.
+
+2015-10-24 15:17  swilson
+
+	* bashpack.pl (1.6): Add comments. Correct interpreter capture,
+	  spaces after source file, and cwd in path.
+
+2015-10-23 20:34  swilson
+
+	* mon-hosts.sh (1.14): Make appending the line consistent with the
+	  rest of the function - using printf.
+
+2015-10-23 20:28  swilson
+
+	* mon-hosts.sh (1.13): Delay printing until the run is done.
+
+2015-10-23 19:42  swilson
+
+	* mon-hosts.sh (1.12): Short circuit -R if nothing is returned.
+
+2015-10-23 19:36  swilson
+
+	* mon-hosts.sh (1.11): Add debugging and check value - not defined.
+
+2015-10-23 18:34  swilson
+
+	* mon-hosts.sh (1.10): Add an option to use the return value and
+	  use that value if the host is up. Surround any value with
+	  brackets. Correct newline.
+
+2015-10-23 17:14  swilson
+
+	* mon-hosts.sh (1.9): Add minwidth, fix help, fix math/logic.
+
+2015-10-23 13:10  swilson
+
+	* mon-hosts.sh (1.8): Do not unset the actual reference variable,
+	  pass the group name to be printed.
+
+2015-10-23 12:50  swilson
+
+	* mon-hosts.sh (1.7): Mark hosts that are up, add up/down options,
+	  correct while loop and up/down check.
+
+2015-10-23 12:31  swilson
+
+	* mon-hosts.sh (1.6): Some printing corrections, debug uses a
+	  number, up/down needed to yield the length, syntax error.
+
+2015-10-22 18:44  swilson
+
+	* mon-hosts.sh (1.5): More debugging and a noclear option.
+
+2015-10-22 18:17  swilson
+
+	* mon-hosts.sh (1.4): Move defaults to the top.
+
+2015-10-22 18:15  swilson
+
+	* mon-hosts.sh (1.3): Bugs.
+
+2015-10-22 17:56  swilson
+
+	* mon-hosts.sh (1.2): Insert line breaks.
+
+2015-10-22 17:50  swilson
+
+	* mon-hosts.sh (1.1): Script to monitor host status.
+
+2015-10-09 13:39  swilson
+
+	* sshs.sh (1.2): Not a function anymore - can not have a local var
+	  and quote input.
+
+2015-10-09 13:30  swilson
+
+	* tmux-start.sh (1.7): Fix typos.
+
+2015-10-07 10:35  swilson
+
+	* tmux-start.sh (1.6): Add a shell option to hopefully make loading
+	  faster.
+
+2015-10-07 10:32  swilson
+
+	* sshs.sh (1.1): Make sshs an actual script so it can be used
+	  outside of my zsh.
+
+2015-09-15 14:35  swilson
+
+	* bashpack.pl (1.5): Work with absolute paths - should not search
+	  all paths if it looks like an actual location.
+
+2015-09-15 13:56  swilson
+
+	* bashpack.pl (1.4): Search for sourced files through the path
+	  environment variable.
+
+2015-09-09 07:06  swilson
+
+	* bashpack.pl (1.3): Use a key value system to order and prevent
+	  duping. Match/discard balanced quotes or ticks on source line.
+
+2015-09-03 16:30  swilson
+
+	* bashpack.pl (1.2): Fix errors and only source one interpreter.
+
+2015-09-03 10:54  swilson
+
+	* bashpack.pl (1.1): Initial bash packing script (so that functions
+	  we use all the time can be stored in separate files, sourced, and
+	  included in deployed scripts). Needs to handle matching quotes
+	  and ticks - intentionally does not try to include sourced
+	  variables as those can change at runtime.
+
+2015-08-21 05:00  swilson
+
+	* tmux-start.sh (1.5): Send separate commands and attempt not to
+	  junk up the shell history too much.
+
+2015-08-13 13:19  swilson
+
+	* tmux-start.sh (1.4): Export a function to make sure a command
+	  succeeds vs just waiting an arbitrary time.
+
+2015-08-02 15:57  swilson
+
+	* tmux-start.sh (1.3): Add a sleep (or pause) option as it seems
+	  ssh requires a bit of time to establish port forwards.
+
+2015-07-24 06:31  swilson
+
+	* tmux-start.sh (1.2): Add option to append to the command. Correct
+	  debug (I do not need levels yet).
+
+2015-07-20 11:24  swilson
+
+	* tmux-start.sh (1.1): Copy script from kore_conf in case others
+	  want to use it.
 
