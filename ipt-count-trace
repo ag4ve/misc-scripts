@@ -1,0 +1,366 @@
+#! /usr/bin/env bash
+
+#####
+# msg-handling - contains functions to handle messages.
+#####
+
+#####
+# die [status] "<message>\n"
+#####
+die()
+{
+  if [[ "${1#[-+]}" == [0-9]* ]] ; then
+    status="$1"
+    shift
+  else
+    status=1
+  fi
+  echo -ne "$@" >&2
+  exit "$status"
+}
+
+#####
+# warn <message>
+#####
+warn()
+{
+  echo -ne "WARN: $@\n" >&2
+}
+
+#####
+# debug <level> "<message>"
+# print a message for levels up to and including the absolute debug value or
+# print message that match the debug levels if =<debug> values is used
+# writes to $debug_file if it is set
+#####
+debug()
+{
+  : "${debug:=0}"
+  declare level
+  if [[ "${1#[+-]}" == [0-9]* ]] ; then
+    level="${1#[+-]}"
+    shift
+  fi
+  local output="$@"
+
+  # Define a proper output function
+  if ! declare -f _debug_out >/dev/null 2>&1 ; then
+    if [[ -n "${debug_file:-}" ]] ; then
+      _debug_out()
+      {
+        echo -ne "$@\n" >> "${debug_file:-}"
+      }
+    else
+      _debug_out()
+      {
+        warn "DEBUG $@"
+      }
+    fi
+  fi
+  
+  if [[ -n "${level:-}" ]] ; then
+    # Pin to a debug level
+    if [[ "$debug" == "="* && "${debug#=}" == "$level" ]] ; then
+      _debug_out "[$level]: $output"
+    # Less than or equal to level
+    elif [[ "$debug" != "="* ]] && (( level <= debug )) ; then
+      _debug_out "[$level]: $output"
+    fi
+  # Script didn't set a debug level
+  elif (( debug != 0 )) ; then
+    _debug_out "[nul]: $output"
+  fi
+}
+
+
+# $Id: ipt-count-trace,v 1.1 2015/11/08 07:31:11 swilson Exp $
+
+# Author: Shawn Wilson <swilson@korelogic.com>
+# Copyright 2015 Korelogic Inc. https://www.korelogic.com
+# GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+# http://www.gnu.org/licenses/gpl-3.0.html
+
+# set -vix
+
+# Make sure all ordering is the same across platforms
+export LC_ALL=C
+
+# basename
+script="${0##*/}"
+
+# bash-libs needs to be in your path - also see bashpack
+# Sourced msg-handling.sh
+
+# Split out counter and rule data
+split_line()
+{
+  unset split_ret
+  declare line="$1"
+  declare iptrule=""
+  declare iptpol=""
+  declare iptcount=""
+
+  # Determine what is on the line
+  if [[ "$line" == :* ]] ; then
+    # Chain definition
+    read iptrule iptpol iptcount <<< "$line"
+  elif [[ "$line" == \[* ]] ; then
+    # Rule
+    read iptcount iptrule <<< "$line"
+  else
+    # Comment or table name
+    iptrule="$line"
+  fi
+
+  debug 4 "iptrule [$iptrule] iptpol [$iptpol] iptcount [$iptcount]"
+  declare -ga split_ret=("$iptrule" "$iptpol" "$iptcount")
+}
+
+# Save an output file
+save_file()
+{
+  echo
+
+  # Write diff count
+  if [[ -n "${fileout:-}" ]] ; then
+    echo "Saving ${fileout:-} with hit count"
+    echo > "${fileout:-}"
+    for ((count = 0; count <= "${#rules[@]:-}"; count++)) ; do
+      echo "${seen[$count]:-} ${rules[$count]:-}" >> "${fileout:-}"
+      debug 4 "count [$count] seen count [${seen[$count]:-}] " \
+        "rule [${rules[$count]:-}]"
+    done
+  fi
+
+  # Write last save file
+  if [[ -n "${saveout:-}" ]] ; then
+    echo > "${saveout:-}"
+    for ((count = 0; count <= "${#rules[@]:-}"; count++)) ; do
+      echo "${rules[$count]:-}" >> "${saveout:-}"
+    done
+  fi
+}
+
+# Optimization so the filter test is only run once if no filter is used
+filter()
+{
+  debug 4 "In orig filter"
+  if [[ -n "${filterin:-}" || -n "${filterout:-}" ]] ; then
+    filter()
+    {
+      debug 4 "Setting filter function"
+      declare -a lines=("$@")
+      unset filter_ret
+      declare -ga filter_ret
+      for line in "${lines[@]:-}" ; do
+        # Check filters
+        if [[ ( -n "${filterin:-}" && "${line:-}" =~ "${filterin:-}" ) || \
+          ( -n "${filterout:-}" && ! "${line:-}" =~ "${filterout:-}" ) ]] ; 
+        then
+          filter_ret+=("$line")
+        fi
+      done
+    }
+  else
+    debug 4 "Setting null filter function"
+    filter()
+    {
+      unset filter_ret
+      declare -ga filter_ret=("$@")
+    }
+  fi
+  filter "$@"
+}
+
+opthelp()
+{
+  die "$@\n" \
+    "$script [OPTIONS]\n" \
+    "   -c    command to run between comparisons\n" \
+    "   -C    command to run - must give iptables format output " \
+      "(default: iptables-save -c)\n" \
+    "   -g    regex to include\n" \
+    "   -G    regex to exclude\n" \
+    "   -f    prior file from -F\n" \
+    "   -F    file to save last results to (with diff count)\n" \
+    "   -n    Number of runs before exiting (default: infinite)\n" \
+    "   -s    prior 'iptables-save -c' file to use\n" \
+    "   -S    file to save last results to\n" \
+    "   -t    sleep time between runs (default: 1)\n" \
+    "   -d    debug level\n" \
+    "   -h    this message\n"
+}
+
+while getopts ":c:C:g:G:f:F:n:s:S:t:d:h" opt; do
+  case "$opt" in
+    # Run command
+    c)
+      cmd="${OPTARG}"
+      ;;
+    # Alternate iptables-save
+    C)
+      ipt="${OPTARG}"
+      ;;
+    # Include regex
+    g)
+      filterin="${OPTARG}"
+      ;;
+    # Exclude regex
+    G)
+      filterout="${OPTARG}"
+      ;;
+    # Diff count in
+    f)
+      filein="${OPTARG}"
+      if [[ ! -e "$filein" ]] ; then
+        die "Diff count save file [$filein] does not exist"
+      fi
+      ;;
+    # Diff count out
+    F)
+      fileout="${OPTARG}"
+      ;;
+    # Number of runs
+    n)
+      runs="${OPTARG}"
+      ;;
+    # Save in
+    s)
+      savein="${OPTARG}"
+      if [[ ! -e "$savein" ]] ; then
+        die "Save file [$savein] does not exist"
+      fi
+      ;;
+    # Save out
+    S)
+      saveout="${OPTARG}"
+      ;;
+    # Sleep time
+    t)
+      [[ "${OPTARG}" == [0-9]* ]] || die "-t should be an integer\n"
+      sleeptime="${OPTARG}"
+      ;;
+    # Debug
+    d)
+      debug="${OPTARG}"
+      ;;
+    # Help
+    h)
+      opthelp
+      ;;
+    *)
+      opthelp
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+# Make sure command is present
+if [[ -n "${cmd:-}" ]] && ! type "${cmd%% *}" >/dev/null 2>&1 ; then
+  opthelp "Command [-c ${cmd:-}] not found"
+fi
+
+# Make sure conflicting variables aren't supplied
+if [[ -n "${savein:-}" ]] && [[ -n "${filein:-}" ]] ; then
+  opthelp "-f and -s can not be set together"
+fi
+
+# Define values that are optional parameters
+: ${ipt:="iptables-save -c"}
+: ${sleeptime:=1}
+
+# Get initial data
+mapfile -t ipt_out <<< "$(${ipt:-})"
+
+if [[ -z "${ipt_out[@]:-}" ]] ; then
+  die "You do not have permissions for iptables"
+fi
+
+# Globals where current counts and rules are saved
+declare -a seen
+declare -a rules
+
+# Grab initial data
+# Save file with counter
+if [[ -n "$savein" ]] ; then
+  mapfile -t tipt_in < "${savein:-}"
+  filter "${tipt_in[@]}"
+  rules=("${filter_ret[@]}")
+# Diff save file
+elif [[ -n "$filein" ]] ; then
+  mapfile -t tipt_in < "${filein:-}"
+  filter "${tipt_in[@]}"
+  for line in "${filter_ret[@]}" ; do
+    read count part <<< "$line"
+    seen+=("$count")
+    rules+=("$part")
+  done
+# No initial file
+else
+  mapfile -t tipt_in <<< "$(${ipt:-})"
+  filter "${tipt_in[@]}"
+  rules=("${filter_ret[@]}")
+fi
+
+debug 6 "Initial ipt_in:\n" "$(printf "[%s]\n" "${tipt_in[@]:-}")"
+# Contains nothing
+debug 9 "Initial ipt_out\n" "$(printf "[%s]\n" "${tipt_out[@]:-}")"
+
+# Make an array the same size as rules with 0s
+if [[ -z "${seen[@]:-}" ]] ; then
+  eval "declare -a seen[{0.."${#rules[@]:-0}"}]=0"
+fi
+
+trap save_file EXIT
+
+# Number of runs
+iruns=0
+
+# Main loop
+while true ; do
+  ((iruns++))
+  echo -e "\n* [$(date)]: ${cmd:-}"
+  debug 1 "loop top"
+  eval "${cmd:-}"
+  debug 3 "Parsing post command output."
+
+  # First time does not evaluate - ipt_out is empty
+  for line in "${ipt_out[@]:-}" ; do
+    debug 2 "split running -- ${line:-}"
+    split_line "${line:-}"
+    iptsplit=("${split_ret[@]:-}")
+
+    # Loop through last ruleset and compare them to the current set
+    for ((count = 0; count <= "${#rules[@]:-}"; count++)) ; do
+      debug 3 "split saved -- ${rules[$count]:-}"
+      split_line "${rules[$count]:-}"
+      tmpsplit=("${split_ret[@]:-}")
+      # Not the same rule line
+      if [[ "${tmpsplit[0]:-}" != "${iptsplit[0]:-}" ]] ; then
+        continue
+      # Counters have changed for a matching rule
+      elif [[ -n "${tmpsplit[2]:-}" && -n "${iptsplit[2]:-}" && \
+        "${tmpsplit[2]:-}" != "${iptsplit[2]:-}" ]] ; 
+      then
+        ((seen[$count]++))
+        rules[$count]="$line"
+        echo "${tmpsplit[2]:-} - ${iptsplit[2]:-} -- ${line:-}"
+        break
+      else
+        break
+      fi
+    done
+  done
+
+  debug 1 "loop bottom before sleep"
+  sleep "${sleeptime:-}"
+  mapfile -t ipt_out <<< "$(${ipt:-})"
+  debug 6 "loop ipt_out\n" "$(printf "[%s]\n" "${tipt_out[@]:-}")"
+  filter "${ipt_out[@]:-}"
+  ipt_out=("${filter_ret[@]:-}")
+  if [[ -n "${runs:-}" ]] && (( iruns >= runs )) ; then
+    exit
+  fi
+done
+
+

@@ -1,0 +1,78 @@
+2016-05-17 16:25  hlein
+
+	* Makefile (1.2): Instead of using TARGET_EXEC_DIR and EXEC_FILES
+	  to sometimes mean /usr/local/bin and sometimes /usr/local/sbin
+	  (but never both at once), introduced/renamed to TARGET_BIN_DIR +
+	  BIN_FILES and TARGET_SBIN_DIR + SBIN_FILES.
+
+	  Required touching any Makefile recipe that mentioned any of those
+	  variables.  I think I got them all, and did the right thing, but
+	  I could be wrong.
+
+2015-12-12 11:26  swilson
+
+	* mon-hosts.sign (1.9): Update signature.
+
+2015-12-12 11:26  swilson
+
+	* mon-hosts (1.7): Remove path.
+
+2015-12-12 11:23  swilson
+
+	* mon-hosts.sign (1.8): Update signature.
+
+2015-12-12 11:23  swilson
+
+	* mon-hosts (1.6): Upstream changes.
+
+2015-12-12 08:17  swilson
+
+	* bashpack.tgz.sign (1.1): Update signature.
+
+2015-12-12 08:17  swilson
+
+	* bashpack.tgz (1.1): Initial bashpack archive.
+
+2015-12-12 04:45  swilson
+
+	* mon-hosts.sign (1.7): Update signature.
+
+2015-12-12 04:45  swilson
+
+	* mon-hosts (1.5): Actually pack the script.
+
+2015-12-12 04:04  swilson
+
+	* mon-hosts.sign (1.6): Update signature.
+
+2015-12-12 04:04  swilson
+
+	* mon-hosts (1.4): Upstream changes.
+
+2015-12-11 23:44  swilson
+
+	* mon-hosts (1.3): Upstream changes.
+
+2015-12-11 23:44  swilson
+
+	* mon-hosts.sign (1.4), mon-hosts.sign (1.5): Update signature.
+
+2015-11-20 15:23  swilson
+
+	* mon-hosts.sign (1.3): Update signature.
+
+2015-11-20 15:23  swilson
+
+	* mon-hosts (1.2): Update with upstream changes.
+
+2015-11-08 00:31  swilson
+
+	* ipt-count-trace.sign (1.2), mon-hosts.sign (1.2): Update
+	  signature.
+
+2015-11-08 00:31  swilson
+
+	* Makefile (1.1), ipt-count-trace (1.1), ipt-count-trace.sign
+	  (1.1), mon-hosts (1.1), mon-hosts.sign (1.1): Add packed bash
+	  scripts, their signatures, and Makefile.
+
